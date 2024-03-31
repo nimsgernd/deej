@@ -5,77 +5,133 @@
 * | @date       :	2024-03-26
 * | @author     : Daniel Nimsgern <nimsgernd>
 * | @brief      :	Hardware Audio controler
-* |             : 5 Sliders | 3 Knobs | 6 Buttons | 3 1.5" RGB OLED Modules
+* |             : 10 Sliders | 2 Knobs | 28 Buttons | 12 LED indicators
+* |             : 3 1.5" RGB OLED Modules
 ******************************************************************************/
 
 /******************************************************************************
-  Includes
-******************************************************************************/
+ * Includes
+ *****************************************************************************/
 
-#include "OLED_Driver.h"
-#include "GUI_paint.h"
-#include "DEV_Config.h"
-#include "Debug.h"
-#include "ImageData.h"
-
-/******************************************************************************
-  Variables
-******************************************************************************/
-const int NUM_SLIDERS = 8;
-const int analogInputs[NUM_SLIDERS] = {A0, A1, A2, A3, A4, A5, A6, A7};
-
-const int NUM_BUTTONS = 6;
-const int digitalInputs[NUM_BUTTONS] = {0, 1, 2, 3, 4, 5};
-
-const int NUM_DISP = 3;
-const int displaySelect[NUM_DISP] = {9, 10, 12};
-
-int analogSliderValues[NUM_SLIDERS];
-int digitalButtonValues[NUM_BUTTONS];
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 /******************************************************************************
-  Initialize I/O and Serial Connections
-******************************************************************************/
+ * Variables
+ *****************************************************************************/
+/* Analog Inputs */
+#define NUM_POTS      (int) 12
+static const int analogPotInputs[NUM_POTS] = {A0, A1, A2, A3, A4, A5, A6, A7,
+                                              A8, A9, A10, A11};
+  /*****************
+   | Master : A0
+   | Mic    : A1
+   | Faders : A2-A11
+   *****************/
+
+/* Digital Inputs */
+#define NUM_MUTE_BUTTONS  (int) 12
+#define NUM_MACRO_BUTTONS (int) 16
+static const int digitalMuteButtonInputs[NUM_MUTE_BUTTONS] = {68, 69, 5, 6, 7,
+                                                              8, 9, 10, 11, 12,
+                                                              13, 20};
+static const int digitalMacroButtonInputs[NUM_MACRO_BUTTONS] = {22, 24, 26, 28,
+                                                                30, 32, 34, 36,
+                                                                38, 40, 42, 44,
+                                                                46, 48, 50, 52
+                                                                };
+  /**************************
+   | Master Mute : 68
+   | Mic Mute    : 69
+   | Fader Mutes : 5-13, 20
+   | Macro 1-8   : 22-52 even
+   **************************/
+
+/* LED Pins */
+#define NUM_LEDS      (int) 12
+static const int digitalLEDOutputs[NUM_LEDS] = {14, 15, 23, 25, 27, 29, 31, 33,
+                                                35, 37, 39, 41};
+  /********************
+   | Master : 14
+   | Mic    : 15
+   | Faders : 23-41 odd
+   ********************/
+
+/* OLED Values */
+#define SCREEN_WIDTH  (int) 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT (int) 64 // OLED display height, in pixels
+
+#define OLED_RESET    (int) 0
+#define OLED_DC       (int) 1
+#define NUM_DISPLAYS  (int) 3
+static const int oledCS[NUM_DISPLAYS] = {2, 3, 4};
+  /***************
+   | OLED CS : 2-4
+   ***************/
+
+/* Program Data */
+static int analogPotValues[NUM_POTS];
+static bool digitalMuteButtonValues[NUM_MUTE_BUTTONS];
+static bool digitalMacroButtonValues[NUM_MACRO_BUTTONS];
+static bool ledIndicatorValues[NUM_LEDS];
+static Adafruit_SSD1306 display[NUM_DISPLAYS];
+
+/******************************************************************************
+ * Initialize I/O and Serial Connections
+ *****************************************************************************/
 
 /**********************************************************
   @brief setup
          Initializes all necessary pins and systems.
 **********************************************************/
-void setup() { 
-  /* Analog inputs */
-  for (int i = 0; i < NUM_SLIDERS; i++)
+void setup() {
+  /* Serial Connection */
+  Serial.begin(115200);
+
+  /* Analog Inputs */
+  analogReadResolution(12);
+  for (int i = 0; i < NUM_POTS; i++)
   {
-    pinMode(analogInputs[i], INPUT);
+    pinMode(analogPotInputs[i], INPUT);
   }
 
-  /* Digital Inputs */
-  for (int i = 0; i < NUM_BUTTONS; i++)
+  /* Button Inputs */
+  for (int i = 0; i < NUM_MUTE_BUTTONS; i++)
   {
-    pinMode(digitalInputs[i], INPUT_PULLDOWN);
+    pinMode(digitalMuteButtonInputs[i], INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(digitalMuteButtonInputs[i]), muteButtonPress, FALLING);
+  }
+
+  for (int i = 0; i < NUM_MACRO_BUTTONS; i++)
+  {
+    pinMode(digitalMacroButtonInputs[i], INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(digitalMuteButtonInputs[i]), macroButtonPress, FALLING);
+  }
+
+  /* LED Outputs */
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    pinMode(digitalLEDOutputs[i], OUTPUT);
   }
 
   /* OLED Connections */
-  System_Init();
-  if(USE_IIC) {
-    Serial.print("Only USE_SPI_4W, Please revise DEV_config.h !!!");
-    return 0;
-  }
-
-  Serial.print(F("OLED_Init()...\r\n"));
-  for (int i = 0; i < NUM_DISP; i++)
+  for (int i = 0; i < NUM_DISPLAYS; i++)
   {
-    OLED_1in5_rgb_Init(i);
-    Driver_Delay_ms(500); 
-    OLED_1in5_rgb_Clear(i);
+    display[i] = (SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET,
+                  oledCS[i]);
+    if(!display[i].begin(SSD1306_SWITCHCAPVCC))
+    {
+      Serial.println(F("SSD1306 allocation failed"));
+      for(;;); // Don't proceed, loop forever
+    }
   }
-
-  /* Serial Connection */
-  Serial.begin(115200);
 }
 
 /******************************************************************************
-  Main Program
-******************************************************************************/
+ * Main Program
+ *****************************************************************************/
 
 /**********************************************************
   @brief loop
@@ -89,16 +145,16 @@ void loop() {
 }
 
 /******************************************************************************
-  Functon Definitions
-******************************************************************************/
+ * Functon Definitions
+ *****************************************************************************/
 
 /**********************************************************
   @brief updateValues
          Reads the analog pins to update the values.
 **********************************************************/
 void updateValues() {
-  for (int i = 0; i < NUM_SLIDERS; i++) {
-     analogSliderValues[i] = analogRead(analogInputs[i]);
+  for (int i = 0; i < NUM_POTS; i++) {
+     analogPotValues[i] = analogRead(analogPotInputs[i]);
   }
 }
 
@@ -110,10 +166,10 @@ void updateValues() {
 void sendValues() {
   String builtString = String("");
 
-  for (int i = 0; i < NUM_SLIDERS; i++) {
-    builtString += String((int)analogSliderValues[i]);
+  for (int i = 0; i < NUM_POTS; i++) {
+    builtString += String((int)analogPotValues[i]);
 
-    if (i < NUM_SLIDERS - 1) {
+    if (i < NUM_POTS - 1) {
       builtString += String("|");
     }
   }
@@ -126,14 +182,59 @@ void sendValues() {
          Prints the read values to the serial console.
 **********************************************************/
 void printValues() {
-  for (int i = 0; i < NUM_SLIDERS; i++) {
-    String printedString = String("Slider #") + String(i + 1) + String(": ") + String(analogSliderValues[i]) + String(" mV");
+  for (int i = 0; i < NUM_POTS; i++) {
+    String printedString = String("Slider #") + String(i + 1) + String(": ") +
+                           String(analogPotValues[i]) + String(" mV");
     Serial.write(printedString.c_str());
 
-    if (i < NUM_SLIDERS - 1) {
+    if (i < NUM_POTS - 1) {
       Serial.write(" | ");
     } else {
       Serial.write("\n");
+    }
+  }
+}
+
+/******************************************************************************
+ * Interrupts
+ *****************************************************************************/
+
+/**********************************************************
+  @brief muteButtonPress
+         Interrupt to record when a mute button has been
+         pressed.
+**********************************************************/
+void muteButtonPress()
+{
+  for (int i = 0; i < NUM_MUTE_BUTTONS; i++)
+  {
+    if (digitalRead(digitalMuteButtonInputs[i]) == 0)
+    {
+      digitalMuteButtonValues[i] != digitalMuteButtonValues[i];
+    }
+  }
+}
+
+/**********************************************************
+  @brief macroButtonPress
+         Interrupt to record when a macro button has been
+         pressed.
+**********************************************************/
+void macroButtonPress()
+{
+  int buttonNumber;
+  for (int i = 0; i < NUM_MACRO_BUTTONS; i++)
+  {
+    if(digitalRead(digitalMacroButtonInputs[i]) == 0)
+    {
+      switch(i)
+      {
+        // Add aditional macro stwitch statments as desired;
+        default :
+        {
+          Serial.write("No macro mapped to this button.\n");
+        }
+      }
     }
   }
 }
