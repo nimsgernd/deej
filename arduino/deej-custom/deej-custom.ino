@@ -74,8 +74,6 @@ static const int oledCS[NUM_DISPLAYS] = {2, 3, 4};
 /* Program Data */
 static int analogPotValues[NUM_POTS];
 static bool digitalMuteButtonValues[NUM_MUTE_BUTTONS];
-static bool digitalMacroButtonValues[NUM_MACRO_BUTTONS];
-static bool ledIndicatorValues[NUM_LEDS];
 static Adafruit_SSD1306 display[NUM_DISPLAYS];
 
 /******************************************************************************
@@ -98,6 +96,10 @@ void setup() {
   }
 
   /* Button Inputs */
+  if (NUM_POTS != NUM_MUTE_BUTTONS)
+  {
+    Serial.println("Number of potentiameters is not equal to the number of mute buttons. This may have unexpeced results.\n");
+  }
   for (int i = 0; i < NUM_MUTE_BUTTONS; i++)
   {
     pinMode(digitalMuteButtonInputs[i], INPUT_PULLUP);
@@ -111,6 +113,10 @@ void setup() {
   }
 
   /* LED Outputs */
+  if (NUM_MUTE_BUTTONS != NUM_LEDS)
+  {
+    Serial.println("Number of LEDs is not equal to the number of mute buttons. This may have unexpeced results.\n");
+  }
   for (int i = 0; i < NUM_LEDS; i++)
   {
     pinMode(digitalLEDOutputs[i], OUTPUT);
@@ -139,6 +145,7 @@ void setup() {
 **********************************************************/
 void loop() {
   updateValues();
+  updateLEDs();
   sendValues(); // Actually send data (all the time)
   // printValues(); // For debug
   delay(10);
@@ -155,6 +162,29 @@ void loop() {
 void updateValues() {
   for (int i = 0; i < NUM_POTS; i++) {
      analogPotValues[i] = analogRead(analogPotInputs[i]);
+     if (digitalMuteButtonValues[i])
+     {
+      analogPotValues[i] = 0;
+     }
+  }
+}
+
+/**********************************************************
+  @brief updateLEDs
+         Sets LED states based on the mute button states.
+**********************************************************/
+void updateLEDs()
+{
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    if(digitalMuteButtonValues[i])
+    {
+      digitalWrite(digitalLEDOutputs[i], HIGH);
+    }
+    else
+    {
+      digitalWrite(digitalLEDOutputs[i], LOW);
+    }
   }
 }
 
