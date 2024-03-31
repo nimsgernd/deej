@@ -46,7 +46,7 @@ static const int digitalMacroButtonInputs[NUM_MACRO_BUTTONS] = {22, 24, 26, 28,
    | Master Mute : 68
    | Mic Mute    : 69
    | Fader Mutes : 5-13, 20
-   | Macro 1-8   : 22-52 even
+   | Macro 1-16  : 22-52 even
    **************************/
 
 /* LED Pins */
