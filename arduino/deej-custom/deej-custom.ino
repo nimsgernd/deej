@@ -166,10 +166,13 @@ void loop() {
 **********************************************************/
 void updateValues() {
   for (int i = 0; i < NUM_POTS; i++) {
-     analogPotValues[i] = analogRead(analogPotInputs[i]);
      if (digitalMuteButtonValues[i])
      {
       analogPotValues[i] = 0;
+     }
+     else
+     {
+      analogPotValues[i] = analogRead(analogPotInputs[i]);
      }
   }
 }
@@ -243,7 +246,7 @@ void muteButtonPress()
 {
   for (int i = 0; i < NUM_MUTE_BUTTONS; i++)
   {
-    if (digitalRead(digitalMuteButtonInputs[i]) == 0)
+    if (digitalRead(digitalMuteButtonInputs[i]) == LOW)
     {
       digitalMuteButtonValues[i] != digitalMuteButtonValues[i];
     }
@@ -260,7 +263,7 @@ void macroButtonPress()
   int buttonNumber;
   for (int i = 0; i < NUM_MACRO_BUTTONS; i++)
   {
-    if(digitalRead(digitalMacroButtonInputs[i]) == 0)
+    if(digitalRead(digitalMacroButtonInputs[i]) == LOW)
     {
       switch(i)
       {
