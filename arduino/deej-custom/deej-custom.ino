@@ -38,12 +38,12 @@ static const int analogPotInputs[NUM_POTS] = {A0, A1, A2, A3, A4, A5, A6, A7,
   /**************************
    | Master Mute : 68
    | Mic Mute    : 69
-   | Fader Mutes : 5-13, 20
+   | Fader Mutes : 6-15
    | Macro 1-16  : 22-52 even
    **************************/
-static const int digitalMuteButtonInputs[NUM_MUTE_BUTTONS] = {68, 69, 5, 6, 7,
+static const int digitalMuteButtonInputs[NUM_MUTE_BUTTONS] = {68, 69, 6, 7,
                                                               8, 9, 10, 11, 12,
-                                                              13, 20};
+                                                              13, 14, 15};
 static const int digitalMacroButtonInputs[NUM_MACRO_BUTTONS] = {22, 24, 26, 28,
                                                                 30, 32, 34, 36,
                                                                 38, 40, 42, 44,
@@ -53,26 +53,26 @@ static const int digitalMacroButtonInputs[NUM_MACRO_BUTTONS] = {22, 24, 26, 28,
 /* LED Pins */
 #define NUM_LEDS      (int) 12
   /********************
-   | Master : 14
-   | Mic    : 15
-   | Faders : 23-41 odd
+   | Master : 23
+   | Mic    : 25
+   | Faders : 27-45 odd
    ********************/
-static const int digitalLEDOutputs[NUM_LEDS] = {14, 15, 23, 25, 27, 29, 31, 33,
-                                                35, 37, 39, 41};
+static const int digitalLEDOutputs[NUM_LEDS] = {23, 25, 27, 29, 31, 33, 35, 37,
+                                                39, 41, 43, 45};
 
 /* OLED Values */
 #define SCREEN_WIDTH  (int) 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT (int) 64 // OLED display height, in pixels
 
-#define NUM_DISPLAYS  (int) 3
+#define NUM_DISPLAYS  (int) 4
   /******************
    | OLED Reset : 0
    | OLED DC    : 1
-   | OLED CS    : 2-4
+   | OLED CS    : 2-5
    ******************/
 #define OLED_RESET    (int) 0
 #define OLED_DC       (int) 1
-static const int oledCS[NUM_DISPLAYS] = {2, 3, 4};
+static const int oledCS[NUM_DISPLAYS] = {2, 3, 4, 5};
 
 /* Program Data */
 static int analogPotValues[NUM_POTS];
