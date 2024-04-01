@@ -4,7 +4,7 @@
 * |	@version    :	V1.0
 * | @date       :	2024-03-26
 * | @author     : Daniel Nimsgern <nimsgernd>
-* | @brief      :	Hardware Audio controler
+* | @brief      :	Hardware Audio controller
 * |             : 10 Sliders | 2 Knobs | 28 Buttons | 12 LED indicators
 * |             : 3 1.5" RGB OLED Modules
 ******************************************************************************/
