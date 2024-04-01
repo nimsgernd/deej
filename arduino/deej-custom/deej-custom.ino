@@ -15,6 +15,7 @@
 
 #include <SPI.h>
 #include <Wire.h>
+#include <Keyboard.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -110,6 +111,7 @@ void setup() {
                     muteButtonPress, FALLING);
   }
 
+  Keyboard.begin(KeyboardLayout_en_US);
   for (int i = 0; i < NUM_MACRO_BUTTONS; i++)
   {
     pinMode(digitalMacroButtonInputs[i], INPUT_PULLUP);
