@@ -48,8 +48,7 @@ static const int digitalMuteButtonInputs[NUM_MUTE_BUTTONS] = {68, 69, 6, 7,
 static const int digitalMacroButtonInputs[NUM_MACRO_BUTTONS] = {22, 24, 26, 28,
                                                                 30, 32, 34, 36,
                                                                 38, 40, 42, 44,
-                                                                46, 48, 50, 52
-                                                                };
+                                                                46, 48, 50, 52};
 
 /* LED Pins */
 #define NUM_LEDS      (int) 12

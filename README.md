@@ -1,3 +1,11 @@
+# Deej Fork by Daniel Nimsgern
+
+Original deej project (original description below) by omriharel
+
+I am in the process of adding code for 10 sliders, 2 knobs with pbt, 10 mute buttons, 12 LED mute indicators, 8 Macro buttons, and 4 SPI 128x64 OLED displays.
+
+All custom chages are in the folder /arduino/deej-custom/ with standard minor changes to config.yaml other than that the desktop application has no edits by me.
+
 # deej
 
 deej is an **open-source hardware volume mixer** for Windows and Linux PCs. It lets you use real-life sliders (like a DJ!) to **seamlessly control the volumes of different apps** (such as your music player, the game you're playing and your voice chat session) without having to stop what you're doing.
@@ -18,24 +26,31 @@ deej consists of a [lightweight desktop client](#features) written in Go, and an
 
 ## Table of contents
 
-- [Features](#features)
-- [How it works](#how-it-works)
-  - [Hardware](#hardware)
-    - [Schematic](#schematic)
-  - [Software](#software)
-- [Slider mapping (configuration)](#slider-mapping-configuration)
-- [Build your own!](#build-your-own)
-  - [FAQ](#faq)
-  - [Build video](#build-video)
-  - [Bill of Materials](#bill-of-materials)
-  - [Thingiverse collection](#thingiverse-collection)
-  - [Build procedure](#build-procedure)
-- [How to run](#how-to-run)
-  - [Requirements](#requirements)
-  - [Download and installation](#download-and-installation)
-  - [Building from source](#building-from-source)
-- [Community](#community)
-- [License](#license)
+- [Deej Fork by Daniel Nimsgern](#deej-fork-by-daniel-nimsgern)
+- [deej](#deej)
+  - [Table of contents](#table-of-contents)
+  - [Features](#features)
+  - [How it works](#how-it-works)
+    - [Hardware](#hardware)
+      - [Schematic](#schematic)
+    - [Software](#software)
+  - [Slider mapping (configuration)](#slider-mapping-configuration)
+  - [Build your own!](#build-your-own)
+    - [FAQ](#faq)
+    - [Build video](#build-video)
+    - [Bill of Materials](#bill-of-materials)
+    - [Thingiverse collection](#thingiverse-collection)
+    - [Build procedure](#build-procedure)
+  - [How to run](#how-to-run)
+    - [Requirements](#requirements)
+      - [Windows](#windows)
+      - [Linux](#linux)
+    - [Download and installation](#download-and-installation)
+    - [Building from source](#building-from-source)
+  - [Community](#community)
+    - [Donations](#donations)
+    - [Contributing](#contributing)
+  - [License](#license)
 
 ## Features
 
